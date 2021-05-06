@@ -17,8 +17,10 @@ int lock_init(struct lock *lock){
 
 void acquire(struct lock *lock){
     /* Your code here */
-    while (try_acquire(lock)!=0);
-
+    while (try_acquire(lock)!=0)
+    {
+    }
+	lock->cpuid=cpuid();
 }
 
 // Try to acquire the lock once
