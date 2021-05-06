@@ -17,9 +17,12 @@ int lock_init(struct lock *lock){
 
 void acquire(struct lock *lock){
     /* Your code here */
+    if(holding_lock(lock))
+        BUG("Already acquired the lock!");
     while (try_acquire(lock)!=0)
     {
     }
+    sync_synchronize();
 	lock->cpuid=cpuid();
 }
 
@@ -27,9 +30,12 @@ void acquire(struct lock *lock){
 // Return 0 if succeed, -1 if failed.
 int try_acquire(struct lock *lock){
     /* Your code here */
+    if(holding_lock(lock))
+        BUG("Already acquired the lock!");
     int id=__sync_lock_test_and_set(&(lock->locked),1);
     if(id!=0)
         return -1;
+    sync_synchronize();
     __sync_lock_test_and_set(&(lock->cpuid),cpuid());
     return 0;
 }
@@ -39,8 +45,10 @@ void release(struct lock* lock){
         BUG("Try to release other's lock!");
     if(!is_locked(lock))
         BUG("Try to release an already unlocked lock!");
+    lock->cpuid=-1;
+    sync_synchronize();
     __sync_lock_release(&(lock->locked));
-	lock->cpuid=-1;
+	
     /*int id=__sync_lock_test_and_set(&(lock->locked),0);
     if(id!=1)
         BUG("Try to release an already unlocked lock!");*/
@@ -58,3 +66,4 @@ int holding_lock(struct lock* lock){
 }
 
 #endif  // ACMOS_SPR21_ANSWER_LOCKS_H
+
