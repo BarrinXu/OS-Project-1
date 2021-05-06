@@ -40,6 +40,7 @@ void release(struct lock* lock){
     if(!is_locked(lock))
         BUG("Try to release an already unlocked lock!");
     __sync_lock_release(&(lock->locked));
+	lock->cpuid=-1;
     /*int id=__sync_lock_test_and_set(&(lock->locked),0);
     if(id!=1)
         BUG("Try to release an already unlocked lock!");*/
