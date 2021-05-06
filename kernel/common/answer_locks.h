@@ -11,6 +11,7 @@ int lock_init(struct lock *lock){
     if(nlock >= MAXLOCKS) BUG("Max lock count reached.");
     locks[nlock++] = lock;
     lock->locked=0;
+	lock->cpuid=-1;
     return 0;
 }
 
