@@ -30,6 +30,8 @@ static void printk_write_num(int base, unsigned long long n, int neg) {
     s[k]='\0';
     if(neg==1)
         s[--k]='-';
+    if(n==0)
+        s[--k]='0';
     if(base==2) {
         while(n){
             s[--k]='0'+n%2;
