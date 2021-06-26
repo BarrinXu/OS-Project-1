@@ -144,7 +144,7 @@ pagetable_t proc_pagetable(process_t *p){
         return 0;
     if(pt_map_pages(pagetable, TRAMPOLINE, (uint64)trampoline, PGSIZE, PTE_R|PTE_X)<0)
         BUG("proc_pagetable");
-    if(pt_map_pages(pagetable, TRAPFRAME, (uint64)(p->trapframe), PGSIZE, PTE_R|PTE_W)<0)
+    if(pt_map_pages(pagetable, TRAPFRAME, (uint64)(p->thread->trapframe), PGSIZE, PTE_R|PTE_W)<0)
         BUG("proc_pagetable");
     return pagetable;
 }
@@ -154,6 +154,7 @@ process_t *alloc_proc(const char* bin, thread_t *thr){
     process_t *p;
     p=proc;
     //todo
+    lock_init(&(thr->lock_));
     //init_lock?
     thr->kstack= KSTACK(thr-thre);
     if(p->process_state==UNUSED){
@@ -165,7 +166,9 @@ process_t *alloc_proc(const char* bin, thread_t *thr){
 found:
     p->pid=alloc_pid();
     p->process_state=USED;
-    if((p->trapframe=mm_kalloc())==0)
+    thr->tid=alloc_tid();
+    thr->thread_state=USED;
+    if((thr->trapframe=mm_kalloc())==0)
         BUG("alloc_proc");
     p->pagetable= proc_pagetable(p);
     if(p->pagetable==0)

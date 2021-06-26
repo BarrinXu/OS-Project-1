@@ -95,7 +95,7 @@ typedef struct cpu{
 typedef process_state_t thread_state_t;
 
 typedef struct thread {
-
+    int tid;
     struct list_head process_list_thread_node;
     thread_state_t thread_state;
     struct list_head sched_list_thread_node;
