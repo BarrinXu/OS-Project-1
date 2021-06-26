@@ -13,25 +13,78 @@ typedef __builtin_va_list va_list;
 // 参考资料：https://gcc.gnu.org/onlinedocs/gcc/Extended-Asm.html
 // 注意：我们是 RISCV 架构，最后进入内核态需要 ecall 指令
 void sys_putc(char val){
-    asm volatile("":::"memory");
-    asm volatile("la a0 %0"::"r"(val));
-    asm volatile("li a7 %0"::"r"(SYS_PUTC));
-    asm volatile("ecall");
+
+    asm volatile("li a0, 2\n\t""li a7, 2\n\t""ecall");
+//    asm volatile("la a0, 2\n\t""li a7, 2\n\t""ecall"::::"r"(val));
+    //asm volatile("li a7, 2"::"r"(SYS_PUTC));
+//    asm volatile("li a7, 2"::);
+//    asm volatile("ecall");
 }
 
 void sys_exit(int value){
-    asm volatile("":::"memory");
-    asm volatile("la a0 %0"::"r"(value));
-    asm volatile("li a7 %0"::"r"(SYS_EXIT));
-    asm volatile("ecall");
+    asm volatile("li a0, 2\n\t""li a7, 2\n\t""ecall");
+//    asm volatile();
+//    asm volatile("li a7, %0"::"r"(SYS_EXIT));
+//    asm volatile("ecall");
 }
 
 void sys_yield(){
-    asm volatile("":::"memory");
-    asm volatile("li a7 %0"::"r"(SYS_YIELD));
-    asm volatile("ecall");
+    asm volatile("li a7, 2\n\t"
+                 "ecall");
+//    asm volatile("li a7, %0"::"r"(SYS_YIELD));
+//    asm volatile();
+}
+static void printk_write_string(const char *str) {
+    // Homework 1: YOUR CODE HERE
+    // this function print string by the const char pointer
+    // I think 3 lines of codes are enough, do you think so?
+    // It's easy for you, right?
+
+    while(*str != '\0'){
+        sys_putc(*str);
+        str++;
+    }
+
 }
 
+
+static void printk_write_num(int base, unsigned long long n, int neg) {
+    // Homework 1: YOUR CODE HERE
+    // this function print number `n` in the base of `base` (base > 1)
+    // you may need to call `printk_write_string`
+    // you do not need to print prefix like "0x", "0"...
+    // Remember the most significant digit is printed first.
+    // It's easy for you, right?
+    int k=33;
+    char s[34];
+    s[k]='\0';
+    if(neg==1)
+        s[--k]='-';
+    if(n==0)
+        s[--k]='0';
+    if(base==2) {
+        while(n){
+            s[--k]='0'+n%2;
+            n/=2;
+        }
+    }
+    else if(base==10) {
+        while(n){
+            s[--k]='0'+n%10;
+            n/=10;
+        }
+    }
+    else if(base==16){
+        while(n){
+            if(n%16<10)
+                s[--k]='0'+n%16;
+            else
+                s[--k]='a'+n%16-10;
+            n/=16;
+        }
+    }
+    printk_write_string(&s[k]);
+}
 void printk_format(const char* format, va_list args) {
     int d, i, base;
     char c, *s;
