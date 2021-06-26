@@ -5,9 +5,11 @@
 #include <defs.h>
 #include <riscv.h>
 
-#include "common/lock.h"
-#include "common/printk.h"
-#include "common/uart.h"
+#include "lock.h"
+#include "printk.h"
+#include "uart.h"
+#include "mm.h"
+#include "process.h"
 
 volatile static int started = 0;
 
@@ -22,11 +24,19 @@ void main(){
         printk("UART String: %s\n", "Hello, world!");
         kernel_lock_init();
         TEST_lock_test();
-        suspend();
+        kern_page_init();
+        kern_page_test();
+        mm_init();
+        pt_init();
+        trap_init_vec();
+        sched_init();
+        proc_init();
+        
         sync_synchronize();
         started = 1;
     } else {
         while(started == 0);
         sync_synchronize();
     }
+    sched_start();
 }

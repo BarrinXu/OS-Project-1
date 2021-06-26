@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.16)
 project(acmOS_spr21 C ASM)
 
+
 message(STATUS "operating system: ${CMAKE_SYSTEM}")
 if (CMAKE_SYSTEM_NAME MATCHES "Linux")
     set(CROSS_COMPILE_PREFIX "riscv64-linux-gnu-")
@@ -26,7 +27,7 @@ set(CMAKE_C_FLAGS_RELEASE "-O1 -g2")
 set(CMAKE_C_FLAGS_DEBUG "-O0 -g")
 
 set(CMAKE_C_FLAGS
-        "-Werror -Wall -O -fno-omit-frame-pointer -ggdb -MD -mcmodel=medany -ffreestanding -fno-common -nostdlib")
+        "-Wall -O -fno-omit-frame-pointer -ggdb -MD -mcmodel=medany -ffreestanding -fno-common -nostdlib")
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -D__FILENAME__='\"$(subst ${CMAKE_SOURCE_DIR}/,,$(abspath $<))\"'")
 set(CMAKE_LINK_LIBRARY_FLAG "-z max-page-size=4096")
 
@@ -38,12 +39,16 @@ set(KERNEL_INCLUDE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/include")
 set(KERNEL_ASM_PATH "${KERNEL_PATH}/asm")
 set(KERNEL_BOOT_PATH "${KERNEL_PATH}/boot")
 set(KERNEL_COMMON_PATH "${KERNEL_PATH}/common")
+set(KERNEL_MM_PATH "${KERNEL_PATH}/memory")
+set(KERNEL_PROC_PATH "${KERNEL_PATH}/process")
 
 include_directories("${KERNEL_INCLUDE_PATH}")
 add_subdirectory("${KERNEL_PATH}")
 add_subdirectory("${KERNEL_BOOT_PATH}")
 add_subdirectory("${KERNEL_ASM_PATH}")
 add_subdirectory("${KERNEL_COMMON_PATH}")
+add_subdirectory("${KERNEL_MM_PATH}")
+add_subdirectory("${KERNEL_PROC_PATH}")
 
 
 add_executable(kernel.img
@@ -51,6 +56,8 @@ add_executable(kernel.img
         $<TARGET_OBJECTS:${PROJECT_NAME}-arch>
         $<TARGET_OBJECTS:${PROJECT_NAME}-common>
         $<TARGET_OBJECTS:${PROJECT_NAME}-boot>
+        $<TARGET_OBJECTS:${PROJECT_NAME}-memory>
+        $<TARGET_OBJECTS:${PROJECT_NAME}-proc>
         )
 
 set_property(
